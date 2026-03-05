@@ -2,11 +2,14 @@ import React, { useMemo, useState, useEffect } from 'react'
 import wifiData from '../assets/wifi.json'
 import MapView from '../components/MapView'
 import { useLocation } from 'react-router-dom'
+import { useFavoritesContext } from '../contexts/FavoritesContext'
 const MapPage = () => {
   const [q, setQ] = useState('')
-
   const [selectedSpot, setSelectedSpot] = useState(null)
   const { state } = useLocation()
+  const { toggle, isFavorite } = useFavoritesContext()
+
+
 
   useEffect(() => {
     if (state?.selectedSpot) {
@@ -31,20 +34,20 @@ const MapPage = () => {
 
 
   const isSameSpot = (a, b) =>
-      a?.name === b?.name &&
-      a?.lat === b?.lat &&
-      a?.lng === b?.lng
+    a?.name === b?.name &&
+    a?.lat === b?.lat &&
+    a?.lng === b?.lng
 
-  const spotsToShow=useMemo(()=>{
-    if(!selectedSpot) return filtered
-    if(filtered.some((f)=>isSameSpot(f,selectedSpot))){
+  const spotsToShow = useMemo(() => {
+    if (!selectedSpot) return filtered
+    if (filtered.some((f) => isSameSpot(f, selectedSpot))) {
       return filtered
     }
 
-    return [selectedSpot,...filtered]
+    return [selectedSpot, ...filtered]
 
 
-  },[filtered,selectedSpot])
+  }, [filtered, selectedSpot])
 
 
   return (
@@ -62,9 +65,9 @@ const MapPage = () => {
           <div className="text-center">
 
             <div className="mt-1 h-[100vh]">
-              <MapView 
-              selectedSpot={selectedSpot}
-              spots={spotsToShow}
+              <MapView
+                selectedSpot={selectedSpot}
+                spots={spotsToShow}
               />
             </div>
           </div>
@@ -91,9 +94,9 @@ const MapPage = () => {
           {filtered.map((item, idx) => (
             <li
               key={idx}
-              onClick={()=>setSelectedSpot(item)}
+              onClick={() => setSelectedSpot(item)}
               className={`rounded-xl p-3 hover:bg-slate-50 cursor-pointer border-2
-              ${selectedSpot?.name ===item.name? 'border-slate-900 bg-slate-50':'border-transparent'}
+              ${selectedSpot?.name === item.name ? 'border-slate-900 bg-slate-50' : 'border-transparent'}
               
               `}>
               <div className='flex items-start justify-between gap-3'>
@@ -106,6 +109,15 @@ const MapPage = () => {
                 <span className='rounded bg-slate-100 px-2 py-1 text-xs text-slate-600'>
                   {item.phone}
                 </span>
+                <span 
+                onClick={(e)=>{e.stopPropagation(); toggle(item)}}
+                className='cursor-pointer select-none text-lg'
+                role='button'
+                aria-label={isFavorite(item)?'즐겨찾기 해제':'즐겨찾기 추가'}
+                >
+                  {isFavorite(item)? '❤' : '♡'}
+                </span>
+
               </div>
 
             </li>
